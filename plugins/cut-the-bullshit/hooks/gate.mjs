@@ -5,10 +5,9 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { classifyPost, postToolEvent, preToolEvent } from "../scripts/tool-events.mjs";
+import { isExemptMessage } from "../core/message-policy.mjs";
+import { collectChecklists } from "../core/checklists.mjs";
 
-const SHORT_SENTENCES = 3;
-const SHORT_CHARS = 400;
-const CODE_RATIO = 0.5;
 const REQUIRED = Object.freeze({ interpreters: 2, judges: 3, critiques: 1, max_rounds: 2 });
 const STANDARD = Object.freeze({ interpreters: 1, judges: 2, critiques: 1, max_rounds: 1 });
 const BLOCK_REASON = "출력 준비를 마친 뒤 최종 답변을 다시 제출하세요.";
@@ -236,84 +235,15 @@ function save(state) {
   fs.renameSync(temporary, target);
 }
 
-function sentenceCount(text) {
-  const matches = text.match(/[.!?][\s"'`)\]]*(?=\s|$)/g);
-  return matches?.length ?? 0;
-}
-
-function codeRatio(text) {
-  let fenced = false;
-  let code = 0;
-  let body = 0;
-  for (const line of text.split("\n")) {
-    if (/^\s*```/.test(line)) { fenced = !fenced; code += 1; body += 1; continue; }
-    if (!line.trim()) continue;
-    body += 1;
-    if (fenced || /^\s{4,}\S/.test(line) || /^\s*[+-]{3}\s|^\s*@@ /.test(line) || /^[+-](?![+-])/.test(line)) code += 1;
-  }
-  return body === 0 ? 0 : code / body;
-}
-
-function exempt(message) {
-  return (message.length <= SHORT_CHARS && sentenceCount(message) <= SHORT_SENTENCES) ||
-    codeRatio(message) >= CODE_RATIO;
-}
-
-function readText(file) {
-  try { return fs.readFileSync(file, "utf8"); } catch { return null; }
-}
-
-function numericSettings(text) {
-  const frontmatter = /^---\s*\n([\s\S]*?)\n---(?:\s*\n|$)/.exec(text)?.[1] ?? "";
-  const out = {};
-  const names = new Map([
-    ["해석자 수", "interpreters"], ["interpreter_count", "interpreters"],
-    ["판정자 수", "judges"], ["judge_count", "judges"],
-    ["회차 상한", "max_rounds"], ["max_rounds", "max_rounds"],
-  ]);
-  for (const line of frontmatter.split("\n")) {
-    const match = /^\s*([^:#]+?)\s*:\s*(\d+)\s*$/.exec(line);
-    const key = match && names.get(match[1].trim());
-    if (key && Number(match[2]) > 0 && Number(match[2]) <= 20) out[key] = Number(match[2]);
-  }
-  return out;
-}
-
 function checklistContext(cwd) {
-  const root = pluginRoot();
-  const dir = path.join(root, "checklists");
-  const base = readText(path.join(dir, "base.md"));
-  if (base === null) return { available: false, requirements: { ...REQUIRED }, context: "기본 체크리스트를 읽지 못했다. 이 턴에는 추가 검사를 실행하지 않는다." };
-  const parts = [["기본", base]];
-  const requirements = { ...REQUIRED, ...numericSettings(base) };
-  const overrides = {};
-  let languages = [];
-  try { languages = fs.readdirSync(dir).filter((x) => x.endsWith(".md") && x !== "base.md").sort(); } catch {}
-  for (const name of languages) {
-    const text = readText(path.join(dir, name));
-    if (text !== null) parts.push([`언어 규칙 — ${name.slice(0, -3)}`, text]);
-  }
-  const userRoot = process.env.HOME || process.env.USERPROFILE;
-  if (userRoot) {
-    const text = readText(path.join(userRoot, ".cut-the-bullshit", "checklist.md"));
-    if (text !== null) {
-      parts.push(["전역", text]);
-      Object.assign(overrides, numericSettings(text));
-      Object.assign(requirements, numericSettings(text));
-    }
-  }
-  const project = readText(path.join(cwd || process.cwd(), ".cut-the-bullshit", "checklist.md"));
-  if (project !== null) {
-    parts.push(["프로젝트", project]);
-    Object.assign(overrides, numericSettings(project));
-    Object.assign(requirements, numericSettings(project));
-  }
-  return { available: true, requirements, overrides, context: [
+  const collected = collectChecklists({ pluginRoot: pluginRoot(), cwd, defaults: REQUIRED });
+  if (!collected.available) return { available: false, requirements: { ...REQUIRED }, context: "기본 체크리스트를 읽지 못했다. 이 턴에는 추가 검사를 실행하지 않는다." };
+  return { available: true, requirements: collected.requirements, overrides: collected.overrides, context: [
     "최종 답변이 짧거나 코드 중심이 아니면 cut-the-bullshit 스킬을 실행한다.",
     "검사 과정과 내부 역할 이름을 사용자 화면에 쓰지 말고, 고쳐 쓴 답변 하나만 최종 제출한다.",
     "한 회차의 해석자·판정자 수와 회차 상한은 아래 적용 경로 지시를 따른다.",
     "<<<체크리스트 시작>>>",
-    ...parts.flatMap(([label, text]) => [`## ${label}`, text]),
+    ...collected.parts.flatMap(({ label, text }) => [`## ${label}`, text]),
     "<<<체크리스트 끝>>>",
   ].join("\n\n") };
 }
@@ -665,7 +595,7 @@ function main(input) {
       }
     } else if (event === "Stop") {
       const message = String(input.last_assistant_message ?? input.assistant_message ?? "");
-      if (state.features?.experiment_observe_only || state.checklist_available === false || exempt(message) || (validRound(state) && linkedOutput(state, message))) state.released = true;
+      if (state.features?.experiment_observe_only || state.checklist_available === false || isExemptMessage(message) || (validRound(state) && linkedOutput(state, message))) state.released = true;
       else {
         state.stop_blocks += 1;
         output = { decision: "block", reason: BLOCK_REASON };

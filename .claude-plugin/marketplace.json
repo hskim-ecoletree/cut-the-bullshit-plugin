@@ -1,0 +1,14 @@
+{
+  "name": "ctb-local",
+  "owner": {
+    "name": "hskim"
+  },
+  "description": "cut-the-bullshit 로컬 개발용 마켓플레이스. 저장소 자신을 플러그인으로 낸다.",
+  "plugins": [
+    {
+      "name": "cut-the-bullshit",
+      "source": ".",
+      "description": "사용자 표면에 나갈 최종 메시지를 무맥락 독자로 검사하고, 걸리면 다시 쓰게 한다."
+    }
+  ]
+}

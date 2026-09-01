@@ -1,0 +1,8 @@
+{
+  "name": "cut-the-bullshit",
+  "version": "0.1.1",
+  "description": "사용자 표면에 나갈 최종 메시지를 무맥락 독자로 검사하고, 걸리면 다시 쓰게 한다.",
+  "author": {
+    "name": "hskim"
+  }
+}

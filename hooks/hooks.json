@@ -1,0 +1,28 @@
+{
+  "description": "최종 메시지를 검사하고 다시 쓰게 하는 관문. 판정은 스킬이 한다.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/gate.mjs\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/gate.mjs\"",
+            "timeout": 10,
+            "statusMessage": "마무리"
+          }
+        ]
+      }
+    ]
+  }
+}
