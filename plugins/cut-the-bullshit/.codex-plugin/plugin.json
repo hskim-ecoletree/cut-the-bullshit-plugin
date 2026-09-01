@@ -1,0 +1,22 @@
+{
+  "name": "cut-the-bullshit",
+  "version": "0.1.0+codex.20260901162357",
+  "description": "\uc0ac\uc6a9\uc790\uc5d0\uac8c \ubcf4\ub0bc \uae34 \ucd5c\uc885 \ub2f5\ubcc0\uc744 \ub3c5\ub9bd \ud574\uc11d\u00b7\ud310\uc815\ud558\uace0 \ud544\uc694\ud558\uba74 \ub2e4\uc2dc \uc4f0\ub294 Codex workflow.",
+  "author": {
+    "name": "hskim"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Cut The Bullshit",
+    "shortDescription": "\uae34 \ucd5c\uc885 \ub2f5\ubcc0\uc744 \ub3c5\ub9bd \uac80\uc0ac\ud558\uace0 \ub2e4\uc2dc \uc501\ub2c8\ub2e4.",
+    "longDescription": "\ub450 \ud574\uc11d\uc790\uc640 \uc138 \ud310\uc815\uc790\uc758 \ub3c5\ub9bd \uacb0\uacfc\ub97c \ubaa8\uc544 \uae34 \ucd5c\uc885 \ub2f5\ubcc0\uc758 \uc790\ub9bd\uc131, \ubb38\uc7a5 \ud615\uc2dd, \uc0ac\uc2e4 \ub300\uc751\uc744 \ud655\uc778\ud558\uace0 \ud544\uc694\ud560 \ub54c \uc0ac\uc6a9\uc790\uc5d0\uac8c \ubcf4\uc77c \ub2f5\ub9cc \ub2e4\uc2dc \uc501\ub2c8\ub2e4.",
+    "developerName": "hskim",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive"
+    ],
+    "defaultPrompt": [
+      "\uae34 \ucd5c\uc885 \ub2f5\ubcc0\uc744 \ub0b4\uae30 \uc804\uc5d0 cut-the-bullshit \uc808\ucc28\ub97c \uc801\uc6a9\ud574 \uc918."
+    ]
+  }
+}

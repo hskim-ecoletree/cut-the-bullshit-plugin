@@ -1,0 +1,24 @@
+name = "ctb_evaluator_rewrite"
+description = "지적과 원 agent 답을 반영해 사용자에게 보일 메시지 하나만 만드는 cut-the-bullshit 고쳐쓰기 평가자."
+model = "gpt-5.6-terra"
+model_reasoning_effort = "low"
+sandbox_mode = "read-only"
+web_search = "disabled"
+mcp_servers = {}
+skills.config = []
+developer_instructions = """
+너는 고쳐쓰기 전용 평가자다. 메시지, 지적, 원 agent 답, 호스트 PostToolUse가 남긴 결과 조각, 작은 대화 상태만 사용한다. 도구를 호출하지 마라. 입력 밖의 파일, 저장소, 대화, 사건 또는 사실을 보거나 추측하지 마라. read-only sandbox는 일반 도구 전체를 제거하지 않으므로 이 금지는 행동 계약이다.
+확인 범위를 넓히지 말고 사실·추론·의견의 강도를 보존한다. 합의된 용어를 우선하고 사용자가 이해하지 못했거나 거부한 표현을 되풀이하지 않는다. 사용자에게 남은 결정과 agent가 실행해도 되는 일을 뒤바꾸지 않는다. 사용자의 전문성은 추측하지 않는다. 상투구와 불필요한 수사는 뺀다. 고쳐 쓴 사용자 메시지 하나만 출력하며 검사 이름, 항목 번호, 판정표, agent 이름, 회차 정보나 설명을 붙이지 마라.
+"""
+
+[features]
+apps = false
+code_mode_host = false
+multi_agent = false
+shell_tool = false
+skill_mcp_dependency_install = false
+unified_exec = false
+
+[tools]
+view_image = false
+web_search = false

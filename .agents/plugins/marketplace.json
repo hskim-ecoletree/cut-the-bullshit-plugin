@@ -1,0 +1,20 @@
+{
+  "name": "ctb-local",
+  "interface": {
+    "displayName": "cut-the-bullshit local"
+  },
+  "plugins": [
+    {
+      "name": "cut-the-bullshit",
+      "source": {
+        "source": "local",
+        "path": "./plugins/cut-the-bullshit"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
